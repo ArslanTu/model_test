@@ -1,5 +1,4 @@
 import argparse
-# import openai
 import os
 import numpy as np
 import pandas as pd
@@ -76,7 +75,10 @@ def eval(args, subject, engine, dev_df, test_df):
     cors = np.array(cors)
 
     all_probs = np.array(all_probs)
-    print("Average accuracy {:.3f} - {}".format(acc, subject))
+    result_on_cur_test = "Average accuracy {:.3f} - {}".format(acc, subject)
+    with open(os.path.join("results", f"results_{engine}", "test_result.txt"), mode='a') as file:
+        file.write(result_on_cur_test + "\n")
+    print(result_on_cur_test)
 
     return cors, acc, all_probs
 
@@ -96,7 +98,8 @@ def main(args):
     for engine in engines:
         print(engine)
         all_cors = []
-
+        if os.path.exists(os.path.join("results", f"results_{engine}", "test_result.txt")):
+            os.remove(os.path.join("results", f"results_{engine}", "test_result.txt"))
         for subject in subjects:
             dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[:args.ntrain]
             test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
@@ -104,14 +107,18 @@ def main(args):
             cors, acc, probs = eval(args, subject, engine, dev_df, test_df)
             all_cors.append(cors)
 
+            # 追加列，回答是否正确
             test_df["{}_correct".format(engine)] = cors
-            for j in range(probs.shape[1]):
-                choice = choices[j]
-                test_df["{}_choice{}_probs".format(engine, choice)] = probs[:, j]
+            # for j in range(probs.shape[1]):
+            #     choice = choices[j]
+            #     test_df["{}_choice{}_probs".format(engine, choice)] = probs[:, j]
             test_df.to_csv(os.path.join(args.save_dir, "results_{}".format(engine), "{}.csv".format(subject)), index=None)
 
         weighted_acc = np.mean(np.concatenate(all_cors))
-        print("Average accuracy: {:.3f}".format(weighted_acc))
+        result_on_cur_engine = "Average accuracy: {:.3f}".format(weighted_acc)
+        with open(os.path.join("results", f"results_{engine}", "test_result.txt"), mode='a') as file:
+            file.write(result_on_cur_engine + "\n")
+        print(result_on_cur_engine)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
