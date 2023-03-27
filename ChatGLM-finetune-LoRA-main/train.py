@@ -27,8 +27,8 @@ checkpoint = "THUDM/chatglm-6b"
 mixed_precision = 'bf16'
 
 accumulate_step = 8
-MAX_LENGTH = 968
-
+# MAX_LENGTH = 968
+MAX_LENGTH = 256
 config = LoraConfig(
     peft_type="LORA", 
     r=32, 
@@ -225,5 +225,5 @@ for epoch in range(NUM_EPOCHS):
     accelerator.wait_for_everyone()
     if accelerator.is_main_process:
         peft_model_id = f"finetune_{epoch}"
-        accelerator.save(lora.lora_state_dict(accelerator.unwrap_model(model)), '/saved/'+peft_model_id+'.pt')
+        accelerator.save(lora.lora_state_dict(accelerator.unwrap_model(model)), './saved/'+peft_model_id+'.pt')
     
