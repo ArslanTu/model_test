@@ -51,7 +51,7 @@ def eval(args, subject, engine, dev_df, test_df):
         train_prompt = gen_prompt(dev_df, subject, k)
         prompt = train_prompt + prompt_end
 
-        label = test_df.iloc[i, test_df.shape[1]-1]
+        label = test_df.iloc[i, test_df.shape[1]-1] # 正确答案
 
         while True:
             try:
@@ -75,9 +75,10 @@ def eval(args, subject, engine, dev_df, test_df):
     cors = np.array(cors)
 
     all_probs = np.array(all_probs)
+
     result_on_cur_test = "Average accuracy {:.3f} - {}".format(acc, subject)
-    with open(os.path.join("results", f"results_{engine}", "test_result.txt"), mode='a') as file:
-        file.write(result_on_cur_test + "\n")
+    with os.open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
+        file.write(f"{subject},{acc}\n")
     print(result_on_cur_test)
 
     return cors, acc, all_probs
@@ -98,8 +99,10 @@ def main(args):
     for engine in engines:
         print(engine)
         all_cors = []
-        if os.path.exists(os.path.join("results", f"results_{engine}", "test_result.txt")):
-            os.remove(os.path.join("results", f"results_{engine}", "test_result.txt"))
+        if os.path.exists(os.path.join("results", f"results_{engine}.csv")):
+            os.remove(os.path.join("results", f"results_{engine}.csv"))
+        with os.open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
+            file.write("Subject,Accuracy\n")
         for subject in subjects:
             dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[:args.ntrain]
             test_df = pd.read_csv(os.path.join(args.data_dir, "test", subject + "_test.csv"), header=None)
@@ -109,22 +112,20 @@ def main(args):
 
             # 追加列，回答是否正确
             test_df["{}_correct".format(engine)] = cors
-            # for j in range(probs.shape[1]):
-            #     choice = choices[j]
-            #     test_df["{}_choice{}_probs".format(engine, choice)] = probs[:, j]
             test_df.to_csv(os.path.join(args.save_dir, "results_{}".format(engine), "{}.csv".format(subject)), index=None)
 
         weighted_acc = np.mean(np.concatenate(all_cors))
+        
         result_on_cur_engine = "Average accuracy: {:.3f}".format(weighted_acc)
-        with open(os.path.join("results", f"results_{engine}", "test_result.txt"), mode='a') as file:
-            file.write(result_on_cur_engine + "\n")
+        with os.open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
+            file.write(f"Average,{weighted_acc}\n")
         print(result_on_cur_engine)
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("--ntrain", "-k", type=int, default=5)
     parser.add_argument("--data_dir", "-d", type=str, default="data")
-    parser.add_argument("--save_dir", "-s", type=str, default="results")
+    parser.add_argument("--save_dir", "-s", type=str, default="../log/test_details")
     parser.add_argument("--engine", "-e", choices=["chatglm_6b"],
                         default=["chatglm_6b"], nargs="+")
     args = parser.parse_args()
