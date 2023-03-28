@@ -51,7 +51,7 @@ for key, module in model.named_modules():
         module.query_key_value = peft.tuners.lora.LoraModel(config, module.query_key_value)
 
 # load the LoRA checkpoint
-model.load_state_dict(torch.load('../ChatGLM-finetune-LoRA-main/saved/finetune_1.pt'), strict=False)
+model.load_state_dict(torch.load('../../../ChatGLM-finetune-LoRA-main/saved/finetune_1.pt'), strict=False)
 
 model.half().cuda().eval()
 
