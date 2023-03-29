@@ -77,7 +77,7 @@ def eval(args, subject, engine, dev_df, test_df):
     all_probs = np.array(all_probs)
 
     result_on_cur_test = "Average accuracy {:.3f} - {}".format(acc, subject)
-    with os.open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
+    with open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
         file.write(f"{subject},{acc}\n")
     print(result_on_cur_test)
 
@@ -99,7 +99,7 @@ def main(args):
     all_cors = []
     if os.path.exists(os.path.join("results", f"results_{engine}.csv")):
         os.remove(os.path.join("results", f"results_{engine}.csv"))
-    with os.open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
+    with open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
         file.write("Subject,Accuracy\n")
     for subject in subjects:
         dev_df = pd.read_csv(os.path.join(args.data_dir, "dev", subject + "_dev.csv"), header=None)[:args.ntrain]
@@ -115,7 +115,7 @@ def main(args):
     weighted_acc = np.mean(np.concatenate(all_cors))
         
     result_on_cur_engine = "Average accuracy: {:.3f}".format(weighted_acc)
-    with os.open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
+    with open(os.path.join("results", f"results_{engine}.csv"), mode='a') as file:
         file.write(f"Average,{weighted_acc}\n")
     print(result_on_cur_engine)
 
