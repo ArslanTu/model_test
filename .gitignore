@@ -1,6 +1,8 @@
 data.tar
 test/data/
 log/
+ChatGLM-finetune-LoRA-main/saved
+ChatGLM-finetune-LoRA-main/data
 
 # ---> VisualStudioCode
 .vscode/*
